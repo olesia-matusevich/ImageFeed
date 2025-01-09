@@ -99,17 +99,16 @@ final class AuthViewController: UIViewController {
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         
-        let oauth2Service = OAuth2Service.shared
-        oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
+        //let oauth2Service = OAuth2Service.shared
+        //oauth2Service.fetchOAuthToken(code: code) { [weak self] result in
+        
+        OAuth2Service.shared.fetchOAuthToken(code: code) { [weak self] result in
             switch result {
             case .success(let token):
-                self?.tokenStorage.token = token.token
+                guard let self else { return }
+                self.tokenStorage.token = token.token
                 print("token saved")
-                
-                if let self = self {
-                    self.delegate?.authViewController(self, didAuthenticateWithCode: code)
-                } else { return }
-                
+                self.delegate?.authViewController(self, didAuthenticateWithCode: code)
             case .failure(let error):
                 print("error saving token")
             }

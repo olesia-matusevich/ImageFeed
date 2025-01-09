@@ -13,7 +13,7 @@
         <!--Unsplash-->
         <scene sceneID="ZCM-dt-xFo">
             <objects>
-                <viewController id="LVc-af-HqL" userLabel="Unsplash" customClass="SplashViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController modalPresentationStyle="fullScreen" id="LVc-af-HqL" userLabel="Unsplash" customClass="SplashViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="kZi-GS-W1y">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -30,7 +30,7 @@
                         </constraints>
                     </view>
                     <connections>
-                        <segue destination="Yt1-mS-Cst" kind="show" identifier="ShowAuthenticationScreen" id="UGY-gZ-ESi"/>
+                        <segue destination="Yt1-mS-Cst" kind="presentation" identifier="ShowAuthenticationScreen" modalPresentationStyle="fullScreen" id="UGY-gZ-ESi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="yoS-0Y-2Up" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -62,9 +62,9 @@
         <!--Auth View Controller-->
         <scene sceneID="vD4-bO-yoe">
             <objects>
-                <viewController id="9BS-Uh-v4h" customClass="AuthViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController wantsFullScreenLayout="YES" modalPresentationStyle="fullScreen" id="9BS-Uh-v4h" customClass="AuthViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="tLB-uT-gIR">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="842"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <viewLayoutGuide key="safeArea" id="Vxp-SR-Wp7"/>
                         <color key="backgroundColor" name="CastomBlackColor"/>
@@ -276,7 +276,7 @@
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="Qeq-iN-aca"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="HC0-ct-kqa">
-                        <rect key="frame" x="0.0" y="0.0" width="393" height="56"/>
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
