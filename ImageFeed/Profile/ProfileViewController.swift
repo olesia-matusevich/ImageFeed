@@ -10,6 +10,9 @@ import UIKit
 final class ProfileViewController: UIViewController {
     
     // MARK: - Private Properties
+    private let profileService = ProfileService.shared
+    
+    private var userName: String?
     
     private let profileImageView: UIImageView = {
         let view = UIImageView()
@@ -18,24 +21,24 @@ final class ProfileViewController: UIViewController {
         return view
     }()
     
-    private let userNameLabel: UILabel = {
-        let label = UILabel()
+    private var userNameLabel: UILabel = {
+        var label = UILabel()
         label.text = "Екатерина Новикова"
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: 23)
         return label
     }()
     
-    private let userLoginLabel: UILabel = {
-        let label = UILabel()
+    private var userLoginLabel: UILabel = {
+        var label = UILabel()
         label.text = "@ekaterina_nov"
         label.textColor = UIColor(named: "CustomGreyColorLogin")
         label.font = .systemFont(ofSize: 13)
         return label
     }()
     
-    private let descriptionLabel: UILabel = {
-        let label = UILabel()
+    private var descriptionLabel: UILabel = {
+        var label = UILabel()
         label.text = "Hello, World!"
         label.textColor = .white
         label.font = .systemFont(ofSize: 13)
@@ -58,6 +61,10 @@ final class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let profile = profileService.profile {
+            updateProfileDetails(profile: profile)
+        }
         setupViews()
         setupСonstraints()
     }
@@ -67,6 +74,13 @@ final class ProfileViewController: UIViewController {
     @objc
     private func didTapButton() {
         // TODO: Добавить обработчик нажатия кнопки логаута
+    }
+    
+    private func updateProfileDetails(profile: Profile){
+        userName = profile.username
+        userNameLabel.text = profile.name
+        userLoginLabel.text = profile.loginName
+        descriptionLabel.text = profile.bio
     }
     
     private func setupViews() {

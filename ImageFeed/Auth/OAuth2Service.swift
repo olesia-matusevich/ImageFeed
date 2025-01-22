@@ -7,7 +7,16 @@
 
 import Foundation
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 final class OAuth2Service {
+    
+    private let urlSession = URLSession.shared
+        
+    private var task: URLSessionTask?
+    private var lastCode: String?
     
     static let shared = OAuth2Service()
     private let jsonDecoder = JSONDecoder()
@@ -35,9 +44,17 @@ final class OAuth2Service {
     }
     
     func fetchOAuthToken(code: String, handler: @escaping (Result<OAuthTokenResponseBody, Error>) -> Void) {
+        
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            handler(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+        task?.cancel()
+        lastCode = code
+        
         guard let request = makeOAuthTokenRequest(code: code) else { return }
         
-        let urlSession = URLSession.shared
         let task = urlSession.data(for: request) { result in
             switch result {
             case .success(let data):
