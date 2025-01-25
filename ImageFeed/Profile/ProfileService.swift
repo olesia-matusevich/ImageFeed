@@ -50,7 +50,7 @@ final class ProfileService {
            
             return request
         } else {
-            print("error creating profile request")
+            print("[makeProfileURLRequest()]: error creating profile request")
             return nil
         }
     }
@@ -62,20 +62,13 @@ final class ProfileService {
         guard let token = OAuth2TokenStorage().token else { return }
         guard let request = makeProfileURLRequest(token: token) else { return }
         
-        let task = urlSession.data(for: request) { [weak self] result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
+            guard let self else { return }
             switch result {
-            case .success(let data):
-                do {
-                    self?.jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let profileResult = try self?.jsonDecoder.decode(ProfileResult.self, from: data)
-                    //let profile = Profile(result: profileResult!)
-                    handler(.success(profileResult!))
-                } catch {
-                    print("profile result decoding error error: \(error)")
-                    handler(.failure(error))
-                }
+            case .success(let profileResult):
+                handler(.success(profileResult))
             case .failure(let error):
-                print("error creating URLSessionTask error: \(error)")
+                print("[fetchProfile()]: error creating URLSessionTask. Error: \(error)")
                 handler(.failure(error))
             }
         }

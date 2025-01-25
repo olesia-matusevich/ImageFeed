@@ -12,14 +12,15 @@ struct UserResult: Decodable{
 }
 struct ProfileImage: Decodable {
     let small: String?
-    let medium: String?
-    let large: String?
-    
+    //let medium: String?
+    //let large: String?
 }
 
 final class ProfileImageService {
     
     static let shared = ProfileImageService()
+    static let didChangeNotification = Notification.Name("ProfileImageProviderDidChange")
+    
     private(set) var avatarURL: URL?
     
     private let urlSession = URLSession.shared
@@ -38,7 +39,7 @@ final class ProfileImageService {
             
             return request
         } else {
-            print("error creating profile image request")
+            print("[makeProfileImageURLRequest]: error creating profile image request")
             return nil
         }
     }
@@ -48,29 +49,24 @@ final class ProfileImageService {
         assert(Thread.isMainThread)
         task?.cancel()
         
+        NotificationCenter.default.post(name: ProfileImageService.didChangeNotification,
+                                        object: self,
+                                        userInfo: ["URL": self.avatarURL as Any])
+        
         guard let token = OAuth2TokenStorage().token else { return }
         guard let request = makeProfileImageURLRequest(username: username, token: token) else { return }
         
-        let task = urlSession.data(for: request) { [weak self] result in
-            
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
+            guard let self else { return }
             switch result {
-            case .success(let data):
-                do {
-//                    guard let smallImageURL = profileImageData.profileImage?.small else {return}
-                    self?.jsonDecoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let userResult = try self?.jsonDecoder.decode(UserResult.self, from: data)
-                    guard let smallImageURL = userResult?.profileImage?.small else {
-                        print("profile image result decoding error.")
-                        return}
-                    self?.avatarURL = URL(string: smallImageURL)
-                   print(smallImageURL)
-                    handler(.success(userResult!))
-                } catch {
-                    print("profile image result decoding error. Error: \(error)")
-                    handler(.failure(error))
-                }
+            case .success(let userResult):
+                guard let resultURL = userResult.profileImage?.small else {
+                    print("[fetchProfileImageURL]: profile image URL receiving error.")
+                    return}
+                self.avatarURL = URL(string: resultURL)
+                handler(.success(userResult))
             case .failure(let error):
-                print("error creating URLSessionTask error: \(error)")
+                print("[fetchProfileImageURL]: error creating URLSessionTask. Error: \(error)")
                 handler(.failure(error))
             }
         }

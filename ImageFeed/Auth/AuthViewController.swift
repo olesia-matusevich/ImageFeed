@@ -40,7 +40,6 @@ final class AuthViewController: UIViewController {
     }()
     
     private let tokenStorage = OAuth2TokenStorage()
-    
     weak var delegate: AuthViewControllerDelegate?
     
     // MARK: - Overrides Methods
@@ -58,9 +57,10 @@ final class AuthViewController: UIViewController {
     private func didTapButton() {
         
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+       
         guard let webViewController = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as? WebViewViewController else {return}
         webViewController.delegate = self
-        
+       
         navigationController?.pushViewController(webViewController, animated: true)
     }
     
@@ -95,24 +95,22 @@ final class AuthViewController: UIViewController {
     }
 }
 
-    // MARK: - Extensions
+// MARK: - Extensions
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         
         UIBlockingProgressHUD.show()
-        //ProgressHUD.animate()
         OAuth2Service.shared.fetchOAuthToken(code: code) { [weak self] result in
+            guard let self else {return}
             
             UIBlockingProgressHUD.dismiss()
             switch result {
             case .success(let token):
-                guard let self else { return }
                 self.tokenStorage.token = token.token
-                print("token saved")
                 self.delegate?.authViewController(self, didAuthenticateWithCode: code)
             case .failure(let error):
-                print("error saving token")
+                print("[AuthViewController (delegate)]: error saving token. Error: \(error)")
             }
         }
     }

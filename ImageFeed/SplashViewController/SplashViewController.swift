@@ -19,6 +19,13 @@ final class SplashViewController: UIViewController {
     private let profileImageService = ProfileImageService.shared
     private let alertPresenter = AlertPresenter()
     
+    private let vectorImageView: UIImageView = {
+        let view = UIImageView()
+        let image = UIImage(named: "Vector")
+        view.image = image
+        return view
+    }()
+    
     // MARK: - Overrides Methods
     
     override func viewDidAppear(_ animated: Bool) {
@@ -26,14 +33,18 @@ final class SplashViewController: UIViewController {
         
         alertPresenter.delegate = self
         // для проверки авторизации
-//                UserDefaults.standard.removeObject(forKey: "token")
-//                UserDefaults.standard.synchronize()
+        //OAuth2TokenStorage().removeToken()
+//         UserDefaults.standard.removeObject(forKey: "token")
+//         UserDefaults.standard.synchronize()
         
         if let token = oauth2TokenStorage.token {
             self.fetchProfile()
-            switchToTabBarController()
         } else {
-            performSegue(withIdentifier: ShowAuthenticationScreenSegueIdentifier, sender: nil)
+            //performSegue(withIdentifier: ShowAuthenticationScreenSegueIdentifier, sender: nil)
+            let authController = AuthViewController()
+            authController.delegate = self
+            authController.modalPresentationStyle = .fullScreen
+            present(authController, animated: true)
         }
     }
     
@@ -42,11 +53,33 @@ final class SplashViewController: UIViewController {
         setNeedsStatusBarAppearanceUpdate()
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setupViews()
+        setupСonstraints()
+    }
+    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         .lightContent
     }
     
     // MARK: - Private Methods
+    
+    private func setupViews() {
+        [vectorImageView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
+    }
+    
+    private func setupСonstraints(){
+        NSLayoutConstraint.activate([
+            // кнопка логаута
+            vectorImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            vectorImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
+        ])
+    }
     
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
@@ -55,15 +88,13 @@ final class SplashViewController: UIViewController {
         window.rootViewController = tabBarController
     }
     
-    private func fetchProfileImage(username: String){
-        profileImageService.fetchProfileImageURL(username: username) { [weak self] result in
+    private func fetchProfileImage(profile: Profile){
+        profileImageService.fetchProfileImageURL(username: profile.username) { result in
             switch result {
             case .success(let imageURL):
-                let a = 1
-                //let profile = Profile(result: profileResult)
-                //self?.updateProfile(profile: profile)
+                print(imageURL)
             case .failure(let error):
-                print("error getting profile image")
+                print("[fetchProfileImage()]: error getting profile image. Error: \(error)")
             }
         }
     }
@@ -71,56 +102,47 @@ final class SplashViewController: UIViewController {
     private func fetchProfile(){
         UIBlockingProgressHUD.show()
         
-        profileService.fetchProfile() { [weak self] result in
+        profileService.fetchProfile(){ [weak self] result in
             UIBlockingProgressHUD.dismiss()
             
+            guard let self else {return}
             switch result {
             case .success(let profileResult):
-                self?.profileService.profile = Profile(result: profileResult)
-                //self?.profileImageService.fetchProfileImageURL(username: username) {_ in
-//                    [weak self] resultURL in
-//                    switch resultURL {
-//                    case .success():
-//                        print("изображение профиля получено")
-//                        //let profile = Profile(result: profileResult)
-//                        //self?.updateProfile(profile: profile)
-//                    case .failure():
-//                        print("изображение не получено")
-//                    }
- //               }
+                let profile = Profile(result: profileResult)
+                self.profileService.profile = profile
+                self.fetchProfileImage(profile: profile)
                 
-                self?.switchToTabBarController()
-
+                self.switchToTabBarController()
             case .failure(let error):
-                self?.showLoginAlert(error: error)
-                print("error getting profile. Error: \(error)")
+                self.showLoginAlert(error: error)
+                print("[fetchProfile()]: error getting profile. Error: \(error)")
                 break
             }
         }
     }
     
     private func showLoginAlert(error: Error) {
-        alertPresenter.showAlert(title: "Ошибка",
-                                 message: "Не удалось получить данные профиля, \(error.localizedDescription)") {
+        alertPresenter.showAlert(title: "Что-то пошло не так",
+                                 message: "Не удалось войти в систему, \(error.localizedDescription)") {
             //self.performSegue(withIdentifier: self.ShowAuthenticationScreenSegueIdentifier, sender: nil)
         }
     }
 }
 
-// MARK: - Extensions
+    // MARK: - Extensions
 
 extension SplashViewController {
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == ShowAuthenticationScreenSegueIdentifier {
-            guard
-                let navigationController = segue.destination as? UINavigationController,
-                let viewController = navigationController.viewControllers[0] as? AuthViewController
-            else { fatalError("Failed to prepare for \(ShowAuthenticationScreenSegueIdentifier)") }
-            viewController.delegate = self
-        } else {
-            super.prepare(for: segue, sender: sender)
-        }
-    }
+//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+//        if segue.identifier == ShowAuthenticationScreenSegueIdentifier {
+//            guard
+//                let navigationController = segue.destination as? UINavigationController,
+//                let viewController = navigationController.viewControllers[0] as? AuthViewController
+//            else { fatalError("Failed to prepare for \(ShowAuthenticationScreenSegueIdentifier)") }
+//            viewController.delegate = self
+//        } else {
+//            super.prepare(for: segue, sender: sender)
+//        }
+//    }
 }
 
 extension SplashViewController: AuthViewControllerDelegate {
