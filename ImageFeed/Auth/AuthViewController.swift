@@ -41,6 +41,7 @@ final class AuthViewController: UIViewController {
     
     private let tokenStorage = OAuth2TokenStorage()
     weak var delegate: AuthViewControllerDelegate?
+    private let identifier = "ShowWebView"
     
     // MARK: - Overrides Methods
     
@@ -48,7 +49,7 @@ final class AuthViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         setupСonstraints()
-        configureBackBatton()
+        //configureBackBatton()
     }
     
     // MARK: - Private Methods
@@ -57,11 +58,15 @@ final class AuthViewController: UIViewController {
     private func didTapButton() {
         
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-       
+        
         guard let webViewController = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as? WebViewViewController else {return}
         webViewController.delegate = self
-       
-        navigationController?.pushViewController(webViewController, animated: true)
+        webViewController.modalPresentationStyle = .fullScreen
+        
+        present(webViewController, animated: true)
+        
+        //self.navigationController?.pushViewController(webViewController, animated: true)
+        //self.performSegue(withIdentifier: identifier, sender: nil)
     }
     
     private func setupViews() {
@@ -87,15 +92,15 @@ final class AuthViewController: UIViewController {
         ])
     }
     
-    private func configureBackBatton() {
-        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "CastomBlackColor")
-    }
+//    private func configureBackBatton() {
+//        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
+//        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
+//        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+//        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "CastomBlackColor")
+//    }
 }
 
-// MARK: - Extensions
+    // MARK: - Extensions
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {

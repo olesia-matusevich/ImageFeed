@@ -54,6 +54,7 @@
                         <viewLayoutGuide key="safeArea" id="k5t-il-BQs"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
+                    <navigationItem key="navigationItem" id="4iy-5z-slH"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="osn-tX-Yn3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -225,7 +226,7 @@
         <!--Navigation Controller-->
         <scene sceneID="PuZ-J9-cRE">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Yt1-mS-Cst" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="NavigationController" automaticallyAdjustsScrollViewInsets="NO" id="Yt1-mS-Cst" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="Qeq-iN-aca"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="HC0-ct-kqa">

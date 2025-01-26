@@ -18,6 +18,7 @@ final class SplashViewController: UIViewController {
     private let profileService = ProfileService.shared
     private let profileImageService = ProfileImageService.shared
     private let alertPresenter = AlertPresenter()
+
     
     private let vectorImageView: UIImageView = {
         let view = UIImageView()
@@ -32,15 +33,15 @@ final class SplashViewController: UIViewController {
         super.viewDidAppear(animated)
         
         alertPresenter.delegate = self
+       
         // для проверки авторизации
         //OAuth2TokenStorage().removeToken()
-//         UserDefaults.standard.removeObject(forKey: "token")
-//         UserDefaults.standard.synchronize()
+        //UserDefaults.standard.removeObject(forKey: "token")
+        //UserDefaults.standard.synchronize()
         
         if let token = oauth2TokenStorage.token {
             self.fetchProfile()
         } else {
-            //performSegue(withIdentifier: ShowAuthenticationScreenSegueIdentifier, sender: nil)
             let authController = AuthViewController()
             authController.delegate = self
             authController.modalPresentationStyle = .fullScreen
@@ -131,20 +132,6 @@ final class SplashViewController: UIViewController {
 
     // MARK: - Extensions
 
-extension SplashViewController {
-//    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-//        if segue.identifier == ShowAuthenticationScreenSegueIdentifier {
-//            guard
-//                let navigationController = segue.destination as? UINavigationController,
-//                let viewController = navigationController.viewControllers[0] as? AuthViewController
-//            else { fatalError("Failed to prepare for \(ShowAuthenticationScreenSegueIdentifier)") }
-//            viewController.delegate = self
-//        } else {
-//            super.prepare(for: segue, sender: sender)
-//        }
-//    }
-}
-
 extension SplashViewController: AuthViewControllerDelegate {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
         dismiss(animated: true) { [weak self] in
@@ -153,8 +140,6 @@ extension SplashViewController: AuthViewControllerDelegate {
         }
         //self.switchToTabBarController()
     }
-    
-    
 }
 
 
