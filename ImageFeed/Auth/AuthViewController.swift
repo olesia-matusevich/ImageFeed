@@ -64,9 +64,6 @@ final class AuthViewController: UIViewController {
         webViewController.modalPresentationStyle = .fullScreen
         
         present(webViewController, animated: true)
-        
-        //self.navigationController?.pushViewController(webViewController, animated: true)
-        //self.performSegue(withIdentifier: identifier, sender: nil)
     }
     
     private func setupViews() {

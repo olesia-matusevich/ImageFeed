@@ -56,7 +56,6 @@ final class OAuth2Service {
         guard let request = makeOAuthTokenRequest(code: code) else { return }
         
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
-            guard let self else { return }
             switch result {
             case .success(let decodingToken):
                 handler(.success(decodingToken))

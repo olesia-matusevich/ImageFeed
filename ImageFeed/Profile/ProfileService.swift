@@ -63,7 +63,6 @@ final class ProfileService {
         guard let request = makeProfileURLRequest(token: token) else { return }
         
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
-            guard let self else { return }
             switch result {
             case .success(let profileResult):
                 handler(.success(profileResult))

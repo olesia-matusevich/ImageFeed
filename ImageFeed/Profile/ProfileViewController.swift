@@ -74,11 +74,11 @@ final class ProfileViewController: UIViewController {
                      object: nil,
                      queue: .main
                  ) { [weak self] _ in
-                     guard let self else { return }
-                     self.updateAvatar()
+                     self?.updateAvatar()
                  }
              updateAvatar()
         
+        setupUI()
         setupViews()
         setupСonstraints()
     }
@@ -98,14 +98,15 @@ final class ProfileViewController: UIViewController {
     }
     
     private func updateAvatar(){
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL
-        else { return }
+        guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
         let processor = RoundCornerImageProcessor(cornerRadius: 20)
         profileImageView.kf.setImage(with: profileImageURL,
                                      placeholder: UIImage(named: "placeholder.jpeg"),
                                      options: [.processor(processor)])
         
+    }
+    private func setupUI() {
+        self.view.backgroundColor = .castomBlack
     }
     
     private func setupViews() {

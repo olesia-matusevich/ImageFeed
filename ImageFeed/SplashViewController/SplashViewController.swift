@@ -33,7 +33,7 @@ final class SplashViewController: UIViewController {
         super.viewDidAppear(animated)
         
         alertPresenter.delegate = self
-       
+        
         // для проверки авторизации
         //OAuth2TokenStorage().removeToken()
         //UserDefaults.standard.removeObject(forKey: "token")
@@ -57,6 +57,7 @@ final class SplashViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupUI()
         setupViews()
         setupСonstraints()
     }
@@ -66,6 +67,10 @@ final class SplashViewController: UIViewController {
     }
     
     // MARK: - Private Methods
+    
+    private func setupUI() {
+        self.view.backgroundColor = .castomBlack
+    }
     
     private func setupViews() {
         [vectorImageView].forEach {
@@ -135,8 +140,7 @@ final class SplashViewController: UIViewController {
 extension SplashViewController: AuthViewControllerDelegate {
     func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
         dismiss(animated: true) { [weak self] in
-            guard let self else { return }
-            self.fetchProfile()
+            self?.fetchProfile()
         }
         //self.switchToTabBarController()
     }
