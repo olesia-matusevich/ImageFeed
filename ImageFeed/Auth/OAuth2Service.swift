@@ -7,7 +7,16 @@
 
 import Foundation
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 final class OAuth2Service {
+    
+    private let urlSession = URLSession.shared
+    
+    private var task: URLSessionTask?
+    private var lastCode: String?
     
     static let shared = OAuth2Service()
     private let jsonDecoder = JSONDecoder()
@@ -29,27 +38,29 @@ final class OAuth2Service {
             request.httpMethod = "POST"
             return request
         } else {
-            print("error creating token request")
+            print("[makeOAuthTokenRequest()]: error creating token request")
             return nil
         }
     }
     
     func fetchOAuthToken(code: String, handler: @escaping (Result<OAuthTokenResponseBody, Error>) -> Void) {
+        
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            handler(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+        task?.cancel()
+        lastCode = code
+        
         guard let request = makeOAuthTokenRequest(code: code) else { return }
         
-        let urlSession = URLSession.shared
-        let task = urlSession.data(for: request) { result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             switch result {
-            case .success(let data):
-                do {
-                    let token = try self.jsonDecoder.decode(OAuthTokenResponseBody.self, from: data)
-                    handler(.success(token))
-                } catch {
-                    print("token decoding error error: \(error)")
-                    handler(.failure(error))
-                }
+            case .success(let decodingToken):
+                handler(.success(decodingToken))
             case .failure(let error):
-                print("error creating URLSessionTask error: \(error)")
+                print("[fetchOAuthToken()]: error creating URLSessionTask. Error: \(error)")
                 handler(.failure(error))
             }
         }

@@ -6,10 +6,15 @@
 //
 
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
     // MARK: - Private Properties
+    private let profileService = ProfileService.shared
+    
+    private var userName: String?
+    private var profileImageServiceObserver: NSObjectProtocol?
     
     private let profileImageView: UIImageView = {
         let view = UIImageView()
@@ -18,24 +23,24 @@ final class ProfileViewController: UIViewController {
         return view
     }()
     
-    private let userNameLabel: UILabel = {
-        let label = UILabel()
+    private var userNameLabel: UILabel = {
+        var label = UILabel()
         label.text = "Екатерина Новикова"
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: 23)
         return label
     }()
     
-    private let userLoginLabel: UILabel = {
-        let label = UILabel()
+    private var userLoginLabel: UILabel = {
+        var label = UILabel()
         label.text = "@ekaterina_nov"
         label.textColor = UIColor(named: "CustomGreyColorLogin")
         label.font = .systemFont(ofSize: 13)
         return label
     }()
     
-    private let descriptionLabel: UILabel = {
-        let label = UILabel()
+    private var descriptionLabel: UILabel = {
+        var label = UILabel()
         label.text = "Hello, World!"
         label.textColor = .white
         label.font = .systemFont(ofSize: 13)
@@ -58,6 +63,22 @@ final class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let profile = profileService.profile {
+            updateProfileDetails(profile: profile)
+        }
+        
+        profileImageServiceObserver = NotificationCenter.default
+                 .addObserver(
+                     forName: ProfileImageService.didChangeNotification,
+                     object: nil,
+                     queue: .main
+                 ) { [weak self] _ in
+                     self?.updateAvatar()
+                 }
+             updateAvatar()
+        
+        setupUI()
         setupViews()
         setupСonstraints()
     }
@@ -67,6 +88,25 @@ final class ProfileViewController: UIViewController {
     @objc
     private func didTapButton() {
         // TODO: Добавить обработчик нажатия кнопки логаута
+    }
+    
+    private func updateProfileDetails(profile: Profile){
+        userName = profile.username
+        userNameLabel.text = profile.name
+        userLoginLabel.text = profile.loginName
+        descriptionLabel.text = profile.bio
+    }
+    
+    private func updateAvatar(){
+        guard let profileImageURL = ProfileImageService.shared.avatarURL else { return }
+        let processor = RoundCornerImageProcessor(cornerRadius: 20)
+        profileImageView.kf.setImage(with: profileImageURL,
+                                     placeholder: UIImage(named: "placeholder.jpeg"),
+                                     options: [.processor(processor)])
+        
+    }
+    private func setupUI() {
+        self.view.backgroundColor = .castomBlack
     }
     
     private func setupViews() {

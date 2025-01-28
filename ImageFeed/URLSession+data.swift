@@ -18,7 +18,7 @@ extension URLSession {
         for request: URLRequest,
         completion: @escaping (Result<Data, Error>) -> Void
     ) -> URLSessionTask {
-        let fulfillCompletionOnTheMainThread: (Result<Data, Error>) -> Void = { result in  // 2
+        let fulfillCompletionOnTheMainThread: (Result<Data, Error>) -> Void = { result in
             DispatchQueue.main.async {
                 completion(result)
             }
@@ -31,17 +31,42 @@ extension URLSession {
                 if 200 ..< 300 ~= statusCode {
                     fulfillCompletionOnTheMainThread(.success(data))
                 } else {
-                    print("network error (httpStatusCode) \(String(statusCode))")
+                    print("[URLSession.dataTask()]: network error (httpStatusCode) \(String(statusCode))")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
                 }
             } else if let error = error {
-                print("network error (urlRequestError) error: \(error)")
+                print("[URLSession.dataTask()]: network error (urlRequestError) error: \(error)")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
             } else {
-                print("network error (urlSessionError)")
+                print("[URLSession.dataTask()]: network error (urlSessionError)")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
             }
         })
+        return task
+    }
+    
+    func objectTask<T: Decodable>(
+        for request: URLRequest,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) -> URLSessionTask {
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        
+        let task = data(for: request) { (result: Result<Data, Error>) in
+            switch result {
+            case .success(let data):
+                do {
+                    let decodingData = try decoder.decode(T.self, from: data)
+                    completion(.success(decodingData))
+                } catch {
+                    print("[URLSession.objectTask()]: decoding error. Objekt: \(T.self). Error: \(error)")
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                print("[URLSession.objectTask()]: error creating URLSessionTask. Objekt: \(T.self). Error: \(error)")
+                completion(.failure(error))
+            }
+        }
         return task
     }
 }
