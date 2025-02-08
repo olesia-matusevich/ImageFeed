@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import ProgressHUD
 
 final class SingleImageViewController: UIViewController {
     
     // MARK: - Public Properties
+    var imageURL: URL?
     
     var image: UIImage? {
         didSet {
@@ -29,6 +31,10 @@ final class SingleImageViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let url = imageURL {
+            setImage(url: url)
+        }
         
         guard let image else { return }
         imageView.image = image
@@ -71,9 +77,50 @@ final class SingleImageViewController: UIViewController {
         let y = (newContentSize.height - visibleRectSize.height) / 2
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: false)
     }
+    
+    private func setImage(url: URL) {
+        UIBlockingProgressHUD.show()
+        let placeholderImage = UIImage(named: "placeholder_scribble")
+        imageView.image = placeholderImage
+        imageView.contentMode = .center
+        
+        imageView.kf.setImage(
+            with: url,
+            placeholder: placeholderImage,
+            options: nil,
+            progressBlock: nil,
+            completionHandler: { [weak self] result in
+                DispatchQueue.main.async { [weak self] in
+                    switch result {
+                    case .success(let value):
+                        UIBlockingProgressHUD.dismiss()
+                        self?.image = value.image
+                    case .failure:
+                        print("error")
+                        self?.showError(url: url)
+                    }
+                }
+            }
+        )
+    }
+    
+    private func showError(url: URL){
+        
+        let alert = UIAlertController(title: "Что-то пошло не так",
+                                      message: "Попробовать еще раз?",
+                                      preferredStyle: .alert)
+        let alertActionNo = UIAlertAction(title: "Не надо", style: .default) {_ in self.dismiss(animated: true)
+        }
+        alert.addAction(alertActionNo)
+        let alertActionReturn = UIAlertAction(title: "Повторить", style: .default) {_ in
+            self.setImage(url: url)
+        }
+        alert.addAction(alertActionReturn)
+        self.present(alert, animated: true)
+    }
 }
 
-    // MARK: - Extentions
+// MARK: - Extentions
 
 extension SingleImageViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {

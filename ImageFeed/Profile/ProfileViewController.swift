@@ -11,10 +11,12 @@ import Kingfisher
 final class ProfileViewController: UIViewController {
     
     // MARK: - Private Properties
+    
     private let profileService = ProfileService.shared
     
     private var userName: String?
     private var profileImageServiceObserver: NSObjectProtocol?
+    private let profileLogoutService = ProfileLogoutService.shared
     
     private let profileImageView: UIImageView = {
         let view = UIImageView()
@@ -69,14 +71,14 @@ final class ProfileViewController: UIViewController {
         }
         
         profileImageServiceObserver = NotificationCenter.default
-                 .addObserver(
-                     forName: ProfileImageService.didChangeNotification,
-                     object: nil,
-                     queue: .main
-                 ) { [weak self] _ in
-                     self?.updateAvatar()
-                 }
-             updateAvatar()
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.updateAvatar()
+            }
+        updateAvatar()
         
         setupUI()
         setupViews()
@@ -87,7 +89,25 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapButton() {
-        // TODO: Добавить обработчик нажатия кнопки логаута
+        let alert = UIAlertController(title: nil, message: "Выйти из профиля?", preferredStyle: .alert)
+        
+        let yesAction = UIAlertAction(title: "Да", style: .default) { _ in
+            self.profileLogoutService.logout()
+            
+            guard let window = UIApplication.shared.windows.first else { return }
+            
+            let authViewController = UIStoryboard(name: "Main", bundle: .main)
+                .instantiateViewController(withIdentifier: "AuthViewController")
+            window.rootViewController = authViewController
+            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: {}, completion: nil)
+        }
+        
+        let noAction = UIAlertAction(title: "Нет", style: .default, handler: nil)
+        
+        alert.addAction(yesAction)
+        alert.addAction(noAction)
+        
+        present(alert, animated: true, completion: nil)
     }
     
     private func updateProfileDetails(profile: Profile){

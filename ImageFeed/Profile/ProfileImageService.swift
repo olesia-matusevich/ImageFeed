@@ -18,8 +18,12 @@ struct ProfileImage: Decodable {
 
 final class ProfileImageService {
     
+    // MARK: - Public Properties
+    
     static let shared = ProfileImageService()
     static let didChangeNotification = Notification.Name("ProfileImageProviderDidChange")
+    
+    // MARK: - Private Properties
     
     private(set) var avatarURL: URL?
     
@@ -29,7 +33,9 @@ final class ProfileImageService {
     
     private init(){}
     
-    func makeProfileImageURLRequest(username: String?, token: String) -> URLRequest?{
+    // MARK: - Private Methods
+    
+    private func makeProfileImageURLRequest(username: String?, token: String) -> URLRequest?{
         if let username,
            let baseURL = URL(string: Constants.defaultBaseURL.absoluteString),
            let url = URL(string: "/users/\(username)", relativeTo: baseURL) {
@@ -43,6 +49,8 @@ final class ProfileImageService {
             return nil
         }
     }
+    
+    // MARK: - Public Methods
     
     func fetchProfileImageURL(username: String?, handler: @escaping (Result<UserResult, Error>) -> Void) {
         
@@ -71,5 +79,9 @@ final class ProfileImageService {
             }
         }
         task.resume()
+    }
+    
+    func deleteImage() {
+        avatarURL = nil
     }
 }

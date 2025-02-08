@@ -49,7 +49,6 @@ final class AuthViewController: UIViewController {
         super.viewDidLoad()
         setupViews()
         setupСonstraints()
-        //configureBackBatton()
     }
     
     // MARK: - Private Methods
@@ -88,13 +87,6 @@ final class AuthViewController: UIViewController {
             loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -124)
         ])
     }
-    
-//    private func configureBackBatton() {
-//        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
-//        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
-//        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-//        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "CastomBlackColor")
-//    }
 }
 
     // MARK: - Extensions

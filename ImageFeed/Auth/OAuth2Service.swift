@@ -13,6 +13,8 @@ enum AuthServiceError: Error {
 
 final class OAuth2Service {
     
+    // MARK: - Private Properties
+    
     private let urlSession = URLSession.shared
     
     private var task: URLSessionTask?
@@ -22,6 +24,8 @@ final class OAuth2Service {
     private let jsonDecoder = JSONDecoder()
     
     private init() {}
+    
+    // MARK: - Private Methods
     
     private func makeOAuthTokenRequest(code: String) -> URLRequest? {
         if let baseURL = URL(string: "https://unsplash.com"),
@@ -42,6 +46,8 @@ final class OAuth2Service {
             return nil
         }
     }
+    
+    // MARK: - Public Methods
     
     func fetchOAuthToken(code: String, handler: @escaping (Result<OAuthTokenResponseBody, Error>) -> Void) {
         
