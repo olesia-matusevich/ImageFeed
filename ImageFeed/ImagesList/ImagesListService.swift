@@ -47,10 +47,12 @@ struct Photo {
 }
 
 extension Photo {
+    static let formatter = ISO8601DateFormatter()
+    
     init(result photo: PhotoResult) {
         self.init(id: photo.id,
                   size: CGSize(width: photo.width, height: photo.height),
-                  createdAt: ISO8601DateFormatter().date(from: photo.createdAt),
+                  createdAt: Photo.formatter.date(from: photo.createdAt),
                   welcomeDescription: photo.description,
                   regularImageURL: photo.urls.regular,
                   fullImageURL: photo.urls.full,
@@ -72,7 +74,7 @@ final class ImagesListService {
     private var task: URLSessionTask?
     
     private(set) var photos: [Photo] = []
-    private var lastLoadedPage: Int = 1
+    private var lastLoadedPage: Int = 0
     private let perPage: String = "10"
     private var previousID = ""
     
@@ -97,37 +99,25 @@ final class ImagesListService {
         return request
     }
     
-    private func likePhoto(photoId: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else { return }
-        guard let token = tokenStorage.token else { return }
+    private func likePhoto(photoId: String, isLike: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else {
+            print("[likePhoto()]: error creating profile URL request")
+            return }
+        guard let token = tokenStorage.token else {
+            print("[likePhoto()]: error receiving token")
+            return }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        if isLike {
+            request.httpMethod = "POST"
+        } else {
+            request.httpMethod = "DELETE"
+        }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("[ProfileService]: error liking photo. Error: \(error)")
-                completion(.failure(error))
-                return
-            }
-            self.updatePhoto(photoId: photoId)
-            completion(.success(()))
-        }
-        task.resume()
-    }
-    
-    private func unlikePhoto(photoId: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else { return }
-        guard let token = tokenStorage.token else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "DELETE"
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("[ProfileService]: error unlikePhoto. Error: \(error)")
                 completion(.failure(error))
                 return
             }
@@ -158,7 +148,7 @@ final class ImagesListService {
     // MARK: - Public Methods
     
     func fetchPhotosNextPage(handler: @escaping (Result<[PhotoResult], Error>) -> Void){
-        let nextPage = self.lastLoadedPage + 1
+        let nextPage = lastLoadedPage + 1
         
         guard task == nil else { return }
         //task?.cancel()
@@ -195,11 +185,8 @@ final class ImagesListService {
     }
     
     func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
-        if isLike == false {
-            unlikePhoto(photoId: photoId, completion: completion)
-        } else {
-            likePhoto(photoId: photoId, completion: completion)
-        }
+        
+        likePhoto(photoId: photoId, isLike: isLike, completion: completion)
     }
     
     func deleteList() {

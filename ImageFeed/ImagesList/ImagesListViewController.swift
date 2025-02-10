@@ -167,8 +167,13 @@ extension ImagesListViewController: UITableViewDataSource {
                 print("Error loading image: \(error)")
             }
             let photo = self.photos[indexPath.row]
-            cell.dateLabel.text = dateFormatter.string(from: photo.createdAt ?? Date())
             
+            if let dateCreatedAt = photo.createdAt {
+                cell.dateLabel.text = dateFormatter.string(from: dateCreatedAt)
+            } else {
+                cell.dateLabel.text = ""
+            }
+        
             let likeImage = UIImage(named: photo.isLiked ? "LikeActive" : "LikeNoActive")
             cell.likeButton.setImage(likeImage, for: .normal)
         }

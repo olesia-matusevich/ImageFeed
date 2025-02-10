@@ -89,17 +89,16 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapButton() {
-        let alert = UIAlertController(title: nil, message: "Выйти из профиля?", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Пока, пока!", message: "Уверены, что хотите выйти?", preferredStyle: .alert)
         
         let yesAction = UIAlertAction(title: "Да", style: .default) { _ in
             self.profileLogoutService.logout()
             
-            guard let window = UIApplication.shared.windows.first else { return }
-            
-            let authViewController = UIStoryboard(name: "Main", bundle: .main)
-                .instantiateViewController(withIdentifier: "AuthViewController")
-            window.rootViewController = authViewController
-            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: {}, completion: nil)
+            guard let window = UIApplication.shared.windows.first else {
+                fatalError("Invalid Configuration")
+            }
+            let splashViewController = SplashViewController()
+            window.rootViewController = splashViewController
         }
         
         let noAction = UIAlertAction(title: "Нет", style: .default, handler: nil)

@@ -96,8 +96,10 @@ final class SingleImageViewController: UIViewController {
                         UIBlockingProgressHUD.dismiss()
                         self?.image = value.image
                     case .failure:
-                        print("error")
+                        UIBlockingProgressHUD.dismiss()
+                        print("[setImage()]: set image error")
                         self?.showError(url: url)
+                       
                     }
                 }
             }
