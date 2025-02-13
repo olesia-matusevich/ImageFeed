@@ -10,6 +10,8 @@ import SwiftKeychainWrapper
 
 final class OAuth2TokenStorage {
     
+    // MARK: - Properties
+    
     private let storage: UserDefaults = .standard
     
     private enum Keys: String {
@@ -32,7 +34,10 @@ final class OAuth2TokenStorage {
             }
         }
     }
-    func removeToken(){ //для проверки авторизации
-        let removeSuccessful: Bool = KeychainWrapper.standard.removeObject(forKey: Keys.token.rawValue)
+    
+    // MARK: - Methods
+  
+    func removeToken(){
+        KeychainWrapper.standard.removeObject(forKey: Keys.token.rawValue)
     }
 }

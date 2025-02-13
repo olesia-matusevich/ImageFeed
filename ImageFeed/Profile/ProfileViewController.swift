@@ -11,10 +11,12 @@ import Kingfisher
 final class ProfileViewController: UIViewController {
     
     // MARK: - Private Properties
+    
     private let profileService = ProfileService.shared
     
     private var userName: String?
     private var profileImageServiceObserver: NSObjectProtocol?
+    private let profileLogoutService = ProfileLogoutService.shared
     
     private let profileImageView: UIImageView = {
         let view = UIImageView()
@@ -69,14 +71,14 @@ final class ProfileViewController: UIViewController {
         }
         
         profileImageServiceObserver = NotificationCenter.default
-                 .addObserver(
-                     forName: ProfileImageService.didChangeNotification,
-                     object: nil,
-                     queue: .main
-                 ) { [weak self] _ in
-                     self?.updateAvatar()
-                 }
-             updateAvatar()
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.updateAvatar()
+            }
+        updateAvatar()
         
         setupUI()
         setupViews()
@@ -87,7 +89,24 @@ final class ProfileViewController: UIViewController {
     
     @objc
     private func didTapButton() {
-        // TODO: Добавить обработчик нажатия кнопки логаута
+        let alert = UIAlertController(title: "Пока, пока!", message: "Уверены, что хотите выйти?", preferredStyle: .alert)
+        
+        let yesAction = UIAlertAction(title: "Да", style: .default) { _ in
+            self.profileLogoutService.logout()
+            
+            guard let window = UIApplication.shared.windows.first else {
+                fatalError("Invalid Configuration")
+            }
+            let splashViewController = SplashViewController()
+            window.rootViewController = splashViewController
+        }
+        
+        let noAction = UIAlertAction(title: "Нет", style: .default, handler: nil)
+        
+        alert.addAction(yesAction)
+        alert.addAction(noAction)
+        
+        present(alert, animated: true, completion: nil)
     }
     
     private func updateProfileDetails(profile: Profile){

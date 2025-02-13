@@ -31,29 +31,36 @@ extension Profile {
 }
 
 final class ProfileService {
-    static let shared = ProfileService()
+    
+    // MARK: - Private Properties
     
     private let urlSession = URLSession.shared
     private var task: URLSessionTask?
-    private let jsonDecoder = JSONDecoder()
     
+    // MARK: - Public Properties
+    
+    static let shared = ProfileService()
     var profile: Profile?
     
     private init() {}
     
-    func makeProfileURLRequest(token: String) -> URLRequest?{
+    // MARK: - Private Methods
+    
+    private func makeProfileURLRequest(token: String) -> URLRequest?{
         if let baseURL = URL(string: Constants.defaultBaseURL.absoluteString),
            let url = URL(string: "/me", relativeTo: baseURL) {
             var request = URLRequest(url: url)
             request.httpMethod = "GET"
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-           
+            
             return request
         } else {
             print("[makeProfileURLRequest()]: error creating profile request")
             return nil
         }
     }
+    
+    // MARK: - Public Methods
     
     func fetchProfile(handler: @escaping (Result<ProfileResult, Error>) -> Void) {
         
@@ -72,5 +79,9 @@ final class ProfileService {
             }
         }
         task.resume()
+    }
+    
+    func deleteProfile() {
+        profile = nil
     }
 }

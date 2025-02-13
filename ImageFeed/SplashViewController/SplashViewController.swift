@@ -34,11 +34,6 @@ final class SplashViewController: UIViewController {
         
         alertPresenter.delegate = self
         
-        // для проверки авторизации
-        //OAuth2TokenStorage().removeToken()
-        //UserDefaults.standard.removeObject(forKey: "token")
-        //UserDefaults.standard.synchronize()
-        
         if let token = oauth2TokenStorage.token {
             self.fetchProfile()
         } else {
@@ -130,7 +125,6 @@ final class SplashViewController: UIViewController {
     private func showLoginAlert(error: Error) {
         alertPresenter.showAlert(title: "Что-то пошло не так",
                                  message: "Не удалось войти в систему, \(error.localizedDescription)") {
-            //self.performSegue(withIdentifier: self.ShowAuthenticationScreenSegueIdentifier, sender: nil)
         }
     }
 }
@@ -142,7 +136,6 @@ extension SplashViewController: AuthViewControllerDelegate {
         dismiss(animated: true) { [weak self] in
             self?.fetchProfile()
         }
-        //self.switchToTabBarController()
     }
 }
 
