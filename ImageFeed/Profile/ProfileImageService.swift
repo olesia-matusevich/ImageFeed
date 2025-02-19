@@ -16,7 +16,11 @@ struct ProfileImage: Decodable {
     //let large: String?
 }
 
-final class ProfileImageService {
+public protocol ProfileImageServiceProtocol: AnyObject {
+    var avatarURL: URL? {get}
+}
+
+final class ProfileImageService: ProfileImageServiceProtocol {
     
     // MARK: - Public Properties
     

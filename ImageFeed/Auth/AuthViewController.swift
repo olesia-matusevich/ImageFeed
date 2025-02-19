@@ -35,6 +35,7 @@ final class AuthViewController: UIViewController {
         button.backgroundColor = .white
         button.layer.cornerRadius = 16
         button.layer.masksToBounds = true
+        button.accessibilityIdentifier = "Authenticate"
         
         return button
     }()
@@ -61,6 +62,12 @@ final class AuthViewController: UIViewController {
         guard let webViewController = storyboard.instantiateViewController(withIdentifier: "WebViewViewController") as? WebViewViewController else {return}
         webViewController.delegate = self
         webViewController.modalPresentationStyle = .fullScreen
+        
+        let authHelper = AuthHelper()
+        let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+        webViewController.presenter = webViewPresenter
+        webViewPresenter.view = webViewController
+        //webViewViewController.delegate = self
         
         present(webViewController, animated: true)
     }
@@ -89,7 +96,7 @@ final class AuthViewController: UIViewController {
     }
 }
 
-    // MARK: - Extensions
+// MARK: - Extensions
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {

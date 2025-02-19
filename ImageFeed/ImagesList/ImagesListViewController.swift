@@ -8,13 +8,22 @@
 import UIKit
 import Kingfisher
 
-final class ImagesListViewController: UIViewController {
+public protocol ImagesListControllerProtocol: AnyObject {
+    var presenter: ImagesListPresenterProtocol? { get set }
+    var photos: [Photo] { get }
+    func updateTableViewAnimated()
+}
+
+final class ImagesListViewController: UIViewController & ImagesListControllerProtocol{
     
     // MARK: - Private Properties
     
+   
+    var photos: [Photo] = []
+    var presenter: ImagesListPresenterProtocol?
+    
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
-    private var photos: [Photo] = []
-    private let imagesListService = ImagesListService()
+    private let imagesListService = ImagesListService.shared
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -31,17 +40,17 @@ final class ImagesListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        NotificationCenter.default
-            .addObserver(
-                forName: ImagesListService.didChangeNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                updateTableViewAnimated()
-            }
-        loadedImages()
+        presenter?.viewDidLoad()
+//        NotificationCenter.default
+//            .addObserver(
+//                forName: ImagesListService.didChangeNotification,
+//                object: nil,
+//                queue: .main
+//            ) { [weak self] _ in
+//                guard let self = self else { return }
+//                updateTableViewAnimated()
+//            }
+        presenter?.loadedImages()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -71,7 +80,7 @@ final class ImagesListViewController: UIViewController {
     
     // MARK: - Private Methods
     
-    private func updateTableViewAnimated() {
+    func updateTableViewAnimated() {
         let oldCount = photos.count
         let newCount = imagesListService.photos.count
         photos = imagesListService.photos
@@ -106,19 +115,7 @@ extension ImagesListViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row == photos.count - 1{
-            loadedImages()
-        }
-    }
-    
-    func loadedImages(){
-        imagesListService.fetchPhotosNextPage{ result in
-            switch result {
-            case .success(let imagesResult):
-                print("success")
-            case .failure(let error):
-                print("[loadedImages()]: error getting images. Error: \(error)")
-                break
-            }
+            presenter?.loadedImages()
         }
     }
 }
@@ -159,7 +156,6 @@ extension ImagesListViewController: UITableViewDataSource {
             case .success:
                 DispatchQueue.main.async {
                     cell.cellImage.contentMode = .scaleAspectFill
-                    //self?.tableView.reloadRows(at: [indexPath], with: .automatic)
                     self.tableView.beginUpdates()
                     self.tableView.endUpdates()
                 }
@@ -188,7 +184,8 @@ extension ImagesListViewController: ImagesListCellDelegate {
         UIBlockingProgressHUD.show()
         let isPhotoLiked = !photo.isLiked
         
-        imagesListService.changeLike(photoId: photo.id, isLike: isPhotoLiked) { [weak self] result in
+        presenter?.changeLike(photo: photo){ [weak self] (result: Result<Void, Error>) in
+            //imagesListService.changeLike(photoId: photo.id, isLike: isPhotoLiked) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success:
