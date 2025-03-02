@@ -21,7 +21,7 @@ final class ProfileLogoutService {
     func logout() {
         ProfileService.shared.deleteProfile()
         ProfileImageService.shared.deleteImage()
-        ImagesListService().deleteList()
+        ImagesListService.shared.deleteList()
         OAuth2TokenStorage().removeToken()
         
         cleanCookies()
